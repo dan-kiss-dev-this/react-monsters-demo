@@ -2,11 +2,12 @@ import React, { Component, useEffect, useState } from 'react';
 import './App.css';
 import CardList from './components/card-list/card-list.component'
 import SearchBox from './components/search-box/search-box.component';
+import Fuse from 'fuse.js'
 
 function App() {
   const [searchedValue, setSearchedValue] = useState('');
   const [monsters, setMonsters] = useState([])
-  const [ filteredMonstersState, setFilteredMonsters] = useState(monsters)
+  const [filteredMonstersState, setFilteredMonstersState] = useState(monsters)
 
   useEffect(() => {
     fetch('https://jsonplaceholder.typicode.com/users')
@@ -14,9 +15,32 @@ function App() {
       .then(monstersObject => setMonsters(monstersObject))
   }, [])
 
-  useEffect(()=>{
-    const filteredMonsters = monsters.filter(monster => monster.name.toLowerCase().includes(searchedValue));
-    setFilteredMonsters(filteredMonsters)
+  useEffect(() => {
+    // const filteredMonsters = monsters.filter(monster => monster.name.toLowerCase().includes(searchedValue));
+    const options = {
+      // isCaseSensitive: false,
+      // includeScore: false,
+      // shouldSort: true,
+      // includeMatches: false,
+      // findAllMatches: false,
+      // minMatchCharLength: 1,
+      // location: 0,
+      // threshold: 0.6,
+      // distance: 100,
+      // useExtendedSearch: false,
+      // ignoreLocation: false,
+      // ignoreFieldNorm: false,
+      // fieldNormWeight: 1,
+      keys: [
+        "name",
+        "email"
+      ]
+    };
+    const fuse = new Fuse(monsters, options)
+    const pattern = searchedValue
+    const fuzzyFilteredMonsters = pattern !== "" ? fuse.search(pattern) : monsters
+    console.log(400, fuzzyFilteredMonsters)
+    setFilteredMonstersState(fuzzyFilteredMonsters)
   }, [monsters, searchedValue])
 
   const onSearchChange = e => {
